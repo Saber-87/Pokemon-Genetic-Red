@@ -594,6 +594,8 @@ PlaySubanimation:
 	ld a, [wSubAnimSubEntryAddr]
 	ld l, a
 .loop
+	ld a, [hl]
+	ldh [hSCX], a
 	push hl
 	ld c, [hl] ; frame block ID
 	ld b, 0
@@ -1901,6 +1903,7 @@ AnimationWavyScreen:
 	dec c
 	jr nz, .loop
 	xor a
+	ldh [hSCX], a
 	ldh [hWY], a
 	call SaveScreenTilesToBuffer2
 	call ClearScreen
