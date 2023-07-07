@@ -4650,9 +4650,8 @@ CriticalHitTest:
 .handleEnemy
 	ld [wd0b5], a
 	call GetMonHeader
-	ld a, $ff
+	ld a, $0f					; $0f => fixed critical hit rate of 1/16
 	ld b, a
-	;srl b                        ; (effective (base speed/2))
 	ldh a, [hWhoseTurn]
 	and a
 	ld hl, wPlayerMovePower
@@ -4667,15 +4666,11 @@ CriticalHitTest:
 	dec hl
 	ld c, [hl]                   ; read move id
 	ld a, [de]
-	;bit GETTING_PUMPED, a        ; test for focus energy
-	;jr nz, .focusEnergyUsed      ; bug: using focus energy causes a shift to the right instead of left,
-	                             ; resulting in 1/4 the usual crit chance
-	;sla b                        ; (effective (base speed/2)*2)
-	;jr nc, .noFocusEnergyUsed
-	;ld b, $ff                    ; cap at 255/256
+	bit GETTING_PUMPED, a        ; test for focus energy
+	jr nz, .focusEnergyUsed      
 	jr .noFocusEnergyUsed
 .focusEnergyUsed
-	srl b
+	sla b						 ; *2 for Focus Energy => Critical Chance 1/8 
 .noFocusEnergyUsed
 	ld hl, HighCriticalMoves     ; table of high critical hit moves
 .Loop
@@ -4684,23 +4679,26 @@ CriticalHitTest:
 	jr z, .HighCritical          ; if so, the move about to be used is a high critical hit ratio move
 	inc a                        ; move on to the next move, FF terminates loop
 	jr nz, .Loop                 ; check the next move in HighCriticalMoves
-	;srl b                        ; /2 for regular move (effective (base speed / 2))
 	jr .SkipHighCritical         ; continue as a normal move
 .HighCritical
-	sla b                        ; *2 for high critical hit moves
-	jr nc, .noCarry
-	ld b, $ff                    ; cap at 255/256
-.noCarry
-	sla b                        ; *4 for high critical move (effective (base speed/2)*8))
-	jr nc, .SkipHighCritical
-	ld b, $ff
+	sla b                        ; *2 for high critical hit moves => Critical Hit Chance 1/8 or 1/4 with Focus Energy
+;	jr nc, .noCarry
+;	ld b, $ff                    ; cap at 255/256
+;.noCarry
+;	sla b                        ; *4 for high critical move (effective (base speed/2)*8))
+;	jr nc, .SkipHighCritical
+;	ld b, $ff
 .SkipHighCritical
+	ld a, b
+	inc a
+	jr z, .guaranteedCritical
 	call BattleRandom            ; generates a random value, in "a"
 	rlc a
 	rlc a
 	rlc a
 	cp b                         ; check a against calculated crit rate
 	ret nc                       ; no critical hit if no borrow
+.guaranteedCritical	
 	ld a, $1
 	ld [wCriticalHitOrOHKO], a   ; set critical hit flag
 	ret
