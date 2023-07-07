@@ -9,17 +9,6 @@ TryDoWildEncounter:
 	ret nz
 	callfar IsPlayerStandingOnDoorTileOrWarpTile
 	jr nc, .notStandingOnDoorOrWarpTile
-TestGrassTile:
-	ld a, [wGrassTile]
-	cp c
-	jr z, .return
-	ld a, [wCurMapTileset]
-	cp FOREST
-	jr nz, .return
-	ld a, $34	; check for the extra grass tile in the forest tileset
-	cp c
-.return
-	ret
 .CantEncounter
 	ld a, $1
 	and a
@@ -110,6 +99,18 @@ TestGrassTile:
 	ret
 .willEncounter
 	xor a
+	ret
+
+TestGrassTile:
+	ld a, [wGrassTile]
+	cp c
+	jr z, .return
+	ld a, [wCurMapTileset]
+	cp FOREST
+	jr nz, .return
+	ld a, $34	; check for the extra grass tile in the forest tileset
+	cp c
+.return
 	ret
 
 INCLUDE "data/wild/probabilities.asm"
