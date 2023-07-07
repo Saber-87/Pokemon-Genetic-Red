@@ -4689,16 +4689,12 @@ CriticalHitTest:
 ;	jr nc, .SkipHighCritical
 ;	ld b, $ff
 .SkipHighCritical
-	ld a, b
-	inc a
-	jr z, .guaranteedCritical
 	call BattleRandom            ; generates a random value, in "a"
 	rlc a
 	rlc a
 	rlc a
 	cp b                         ; check a against calculated crit rate
 	ret nc                       ; no critical hit if no borrow
-.guaranteedCritical	
 	ld a, $1
 	ld [wCriticalHitOrOHKO], a   ; set critical hit flag
 	ret
