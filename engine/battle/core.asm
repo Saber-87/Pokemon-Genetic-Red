@@ -4650,9 +4650,9 @@ CriticalHitTest:
 .handleEnemy
 	ld [wd0b5], a
 	call GetMonHeader
-	ld a, [wMonHBaseSpeed]
+	ld a, $0f
 	ld b, a
-	srl b                        ; (effective (base speed/2))
+	;srl b                        ; (effective (base speed/2))
 	ldh a, [hWhoseTurn]
 	and a
 	ld hl, wPlayerMovePower
